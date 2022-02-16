@@ -2,7 +2,11 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 import 'package:camera/camera.dart';
+import 'package:image_cropper/image_cropper.dart';
+import 'package:image_picker/image_picker.dart';
 
 import 'camera_page.dart';
 
@@ -24,7 +28,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: const MyHomePage(title: 'Picture Application'),
+      home: MyHomePage(title: 'Picture Application'),
     );
   }
 }
@@ -42,34 +46,38 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   String message = 'By: Jordan Bhar : SN, Nicholas Cammisuli : 991604281';
+  File? _image;
 
 
 
-  Future<void> onTakePhoto() async {
-    // Ensure that plugin services are initialized so that `availableCameras()`
-    // can be called before `runApp()`
-    WidgetsFlutterBinding.ensureInitialized();
 
-    // Obtain a list of the available cameras on the device.
-    final cameras = await availableCameras();
+  Future onTakePhoto() async{
 
-    // Get a specific camera from the list of available cameras.
-    final firstCamera = cameras.first;
+    try{
+      final image = await ImagePicker().pickImage(
+          source: ImageSource.camera,
+          maxWidth: 300,
+          maxHeight: 300
+      );
+      if(image ==null) return;
 
-    runApp(
-      MaterialApp(
-        theme: ThemeData.dark(),
-        home: TakePictureScreen(
-          // Pass the appropriate camera to the TakePictureScreen widget.
-          camera: firstCamera,
-        ),
-      ),
-    );
+      final imageTemp = File(image.path);
+      setState(() {
+        _image = imageTemp;
+      });
+
+
+    } on PlatformException catch (e){
+      print("failed to pick image: $e");
+    }
+
+
+
   }
 
-  void onResetPhoto(){
 
-  }
+
+
 
 
   @override
@@ -95,7 +103,7 @@ class _MyHomePageState extends State<MyHomePage> {
             Text(message),
             Container(
               margin: const EdgeInsets.only(top: 10.0),
-              child: Image.asset(noImageDisplayed),
+              child: _image == null ? Image.asset("assets/noimage.png") : Image.file(_image!),
             ),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
