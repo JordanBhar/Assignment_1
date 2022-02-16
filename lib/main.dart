@@ -5,11 +5,9 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
-import 'package:camera/camera.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
 
-import 'camera_page.dart';
 
 
 
@@ -46,7 +44,7 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  String message = 'By: Jordan Bhar : SN, Nicholas Cammisuli : 991604281';
+  String message = 'By: Jordan Bhar : 991607958, Nicholas Cammisuli : 991604281';
   File? _image;
 
 
@@ -60,7 +58,10 @@ class _MyHomePageState extends State<MyHomePage> {
           maxWidth: 300,
           maxHeight: 300
       );
-      if(image ==null) return;
+      if(image == null) {
+        showDialog(context: context, builder: (BuildContext context) => _buildPopupDialog(context));
+        return;
+      }
 
       final imageTemp = File(image.path);
       setState(() {
@@ -68,12 +69,28 @@ class _MyHomePageState extends State<MyHomePage> {
       });
 
 
-    } on PlatformException catch (e){
-      print("failed to pick image: $e");
+    } catch(e) {
+      print("error");
     }
 
+    onCropPhoto();
 
+  }
 
+  Future onCropPhoto() async {
+    try {
+      File? tempPhotoPath = await ImageCropper.cropImage(
+          sourcePath: _image!.path
+      );
+      if (tempPhotoPath == null) return;
+
+      final imageTemp = File(tempPhotoPath.path);
+      setState(() {
+        _image = imageTemp;
+      });
+    } on PlatformException catch (e) {
+      print("failed to pick image: $e");
+    }
   }
 
 
@@ -136,3 +153,6 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 }
+
+
+
