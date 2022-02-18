@@ -59,7 +59,7 @@ class _MyHomePageState extends State<MyHomePage> {
           maxHeight: 300
       );
       if(image == null) {
-        showDialog(context: context, builder: (BuildContext context) => _buildPopupDialog(context));
+        showDialog(context: context, builder: (BuildContext context) => _buildPopupDialog(context,"Camera Error","Error: You left the camera without taking a photo"));
         return;
       }
 
@@ -82,7 +82,11 @@ class _MyHomePageState extends State<MyHomePage> {
       File? tempPhotoPath = await ImageCropper.cropImage(
           sourcePath: _image!.path
       );
-      if (tempPhotoPath == null) return;
+      if (tempPhotoPath == null){
+        showDialog(context: context, builder: (BuildContext context) => _buildPopupDialog(context,"Crop Error","Error: You canceled cropping"));
+        return;
+
+      }
 
       final imageTemp = File(tempPhotoPath.path);
       setState(() {
